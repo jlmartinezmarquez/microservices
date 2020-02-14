@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using External.ConfigurationModels;
 using External.ServiceBus;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,7 @@ namespace External
     {
         private static ServiceBusConfig _serviceBusConfig;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var builder = SetConfiguration();
 
@@ -24,7 +25,7 @@ namespace External
             var authors = externalApiClient.GetRandomAuthors();
 
             var serviceBusClient = serviceProvider.GetService<IServiceBusClient>();
-            serviceBusClient.SendMessagesAsync(1);
+            await serviceBusClient.SendMessagesAsync(1);
         }
 
         private static IConfigurationRoot SetConfiguration()

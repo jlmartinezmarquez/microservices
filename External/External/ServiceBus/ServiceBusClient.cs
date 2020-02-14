@@ -39,12 +39,24 @@ namespace External.ServiceBus
                     Console.WriteLine($"Sending message: {messageBody}");
 
                     // Send the message to the topic.
-                    await _topicClient.SendAsync(message);
+                    try
+                    {
+                        await _topicClient.SendAsync(message);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
                 }
             }
             catch (Exception exception)
             {
                 Console.WriteLine($"{DateTime.Now} :: Exception: {exception.Message}");
+            }
+            finally
+            {
+                await _topicClient.CloseAsync();
             }
         }
     }
