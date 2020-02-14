@@ -1,4 +1,5 @@
-﻿using Models;
+﻿using System.Collections.Generic;
+using Models;
 
 namespace External.Builders
 {
@@ -30,6 +31,12 @@ namespace External.Builders
         public ExternalApiAuthorBuilder WithId(int id)
         {
             this.author.Id = id;
+            return this;
+        }
+
+        public ExternalApiAuthorBuilder WithBooks(List<ExternalApiBook> books)
+        {
+            this.author.Books = books;
             return this;
         }
 

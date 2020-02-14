@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using Models;
 
 namespace External.ServiceBus
 {
     public interface IServiceBusClient
     {
-        Task SendMessagesAsync(int numberOfMessagesToSend);
+        Task SendMessageAsync(MessageModel originalMessage);
     }
 }

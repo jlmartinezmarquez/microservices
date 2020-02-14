@@ -1,47 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.IO;
 using System.Threading.Tasks;
-using External.ConfigurationModels;
-using External.ServiceBus;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Models;
+using Writer.ConfigurationModels;
+using Writer.ServiceBus;
 
-namespace External
+namespace Writer
 {
     class Program
     {
         private static ServiceBusConfig _serviceBusConfig;
 
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            SetConfiguration();
+            var builder = SetConfiguration();
 
             var serviceProvider = SetDependencyInjection();
 
-            //Console.WriteLine("Press any key to start importing data from the External API");
-            //Console.ReadKey();
-            
-            var externalApiClient = serviceProvider.GetService<IExternalApiClient>();
-            var authors = externalApiClient.GetRandomAuthors();
-
             var serviceBusClient = serviceProvider.GetService<IServiceBusClient>();
 
-            await SendData(authors, serviceBusClient);
-        }
-
-        private static async Task SendData(List<ExternalApiAuthor> authors, IServiceBusClient serviceBusClient)
-        {
-            foreach (var author in authors)
+            while (true)
             {
-                var message = new MessageModel
+                try
                 {
-                    Author = author,
-                    Operation = ReadOrWrite.Write,
-                    Receiver = Subscriptor.Writer
-                };
-
-                await serviceBusClient.SendMessageAsync(message);
+                    serviceBusClient.RegisterOnMessageHandlerAndReceiveMessages();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    Console.WriteLine("Press a Key to finish");
+                    Console.ReadKey();
+                    break;
+                }
             }
         }
 
@@ -63,7 +54,6 @@ namespace External
         private static ServiceProvider SetDependencyInjection()
         {
             var serviceProvider = new ServiceCollection()
-                .AddSingleton<IExternalApiClient, ExternalApiClient>()
                 .AddSingleton<IServiceBusClient, ServiceBusClient>()
                 .AddSingleton(_serviceBusConfig)
                 .BuildServiceProvider();

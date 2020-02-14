@@ -1,6 +1,6 @@
 ﻿namespace Models
 {
-    public enum Microservice
+    public enum Subscriptor
     {
         Writer = 0,
         Normaliser = 1,
