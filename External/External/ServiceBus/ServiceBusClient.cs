@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using External.ConfigurationModels;
+using Microsoft.Azure.ServiceBus;
 
-namespace External
+namespace External.ServiceBus
 {
-    public static class ServiceBusClient
+    public class ServiceBusClient : IServiceBusClient
     {
         // TODO 1.- Keep going on over here following https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dotnet-how-to-use-topics-subscriptions
         // TODO 2.- Writer microservice, implement subscribing to the topic and just picking the messages for it
@@ -14,7 +16,16 @@ namespace External
         // TODO 6.- As the rest of the steps for the other microservices are pretty much the same, put the Writer and External microservices in Docker containers
         // TODO 7 - Kubernetes. Containers deployment to Azure
 
-        static async Task SendMessagesAsync(int numberOfMessagesToSend)
+        private ServiceBusConfig _serviceBusConfig;
+        private static TopicClient _topicClient;
+
+        public ServiceBusClient(ServiceBusConfig serviceBusConfig)
+        {
+            _serviceBusConfig = serviceBusConfig;
+            _topicClient = new TopicClient(serviceBusConfig.ConnectionString, serviceBusConfig.TopicName);
+        }
+
+        public async Task SendMessagesAsync(int numberOfMessagesToSend)
         {
             try
             {
@@ -28,7 +39,7 @@ namespace External
                     Console.WriteLine($"Sending message: {messageBody}");
 
                     // Send the message to the topic.
-                    await topicClient.SendAsync(message);
+                    await _topicClient.SendAsync(message);
                 }
             }
             catch (Exception exception)
