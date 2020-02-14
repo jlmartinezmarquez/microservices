@@ -16,12 +16,10 @@ namespace External.ServiceBus
         // TODO 6.- As the rest of the steps for the other microservices are pretty much the same, put the Writer and External microservices in Docker containers
         // TODO 7 - Kubernetes. Containers deployment to Azure
 
-        private ServiceBusConfig _serviceBusConfig;
         private static TopicClient _topicClient;
 
         public ServiceBusClient(ServiceBusConfig serviceBusConfig)
         {
-            _serviceBusConfig = serviceBusConfig;
             _topicClient = new TopicClient(serviceBusConfig.ConnectionString, serviceBusConfig.TopicName);
         }
 
