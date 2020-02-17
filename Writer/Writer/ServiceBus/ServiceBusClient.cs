@@ -38,7 +38,7 @@ namespace Writer.ServiceBus
         static async Task ProcessMessagesAsync(Message message, CancellationToken token)
         {
             // Process the message.
-            Console.WriteLine($"Received message: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{JsonConvert.DeserializeObject<ExternalApiAuthor>(Encoding.UTF8.GetString(message.Body));}");
+            Console.WriteLine($"Received message: SequenceNumber:{message.SystemProperties.SequenceNumber} Body:{JsonConvert.DeserializeObject<MesageModel>(Encoding.UTF8.GetString(message.Body));}");
 
             // Complete the message so that it is not received again.
             // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
