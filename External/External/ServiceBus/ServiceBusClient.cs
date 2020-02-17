@@ -10,7 +10,7 @@ namespace External.ServiceBus
 {
     public class ServiceBusClient : IServiceBusClient
     {
-        // TODO 1.- Upload to NuGet.org the Models project
+        // TODO 1.- Get martinezmarquezjlmodelsmicroservices package from nuget.org on Writer
         // TODO 2.- Writer microservice, implement subscribing to the topic and just picking the messages for it, following https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dotnet-how-to-use-topics-subscriptions
         // TODO 3.- Create the Cosmos DB's with Mongo DB in Azure Portal
         // TODO 4.- Implement Saving data on the Read DB on the Writer microservice

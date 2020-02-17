@@ -97,7 +97,7 @@
       "version": "1.0.0",
       "restore": {
         "projectUniqueName": "C:\\Learning\\Microservices\\External\\Models\\Models.csproj",
-        "projectName": "Models",
+        "projectName": "martinezmarquezjlmodelsmicroservices",
         "projectPath": "C:\\Learning\\Microservices\\External\\Models\\Models.csproj",
         "packagesPath": "C:\\Users\\jl.martinez\\.nuget\\packages\\",
         "outputPath": "C:\\Learning\\Microservices\\External\\Models\\obj\\",
