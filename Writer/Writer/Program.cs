@@ -10,7 +10,8 @@ namespace Writer
 {
     class Program
     {
-        private static ServiceBusConfig _serviceBusConfig;
+        private static ServiceBusConfig _writerServiceBusConfig;
+        private static ServiceBusConfig _readerServiceBusConfig;
 
         static void Main(string[] args)
         {
@@ -20,11 +21,13 @@ namespace Writer
 
             var serviceBusClient = serviceProvider.GetService<IServiceBusClient>();
 
+            serviceBusClient.RegisterOnMessageHandlerAndReceiveMessages();
+            
             while (true)
             {
                 try
                 {
-                    serviceBusClient.RegisterOnMessageHandlerAndReceiveMessages();
+
                 }
                 catch (Exception e)
                 {
@@ -38,7 +41,8 @@ namespace Writer
 
         private static IConfigurationRoot SetConfiguration()
         {
-            _serviceBusConfig = new ServiceBusConfig();
+            _readerServiceBusConfig = new ServiceBusConfig();
+            _writerServiceBusConfig = new ServiceBusConfig();
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -46,7 +50,8 @@ namespace Writer
                 .AddEnvironmentVariables()
                 .Build();
 
-            builder.GetSection("ServiceBusConfig").Bind(_serviceBusConfig);
+            builder.GetSection("WriterServiceBusConfig").Bind(_writerServiceBusConfig);
+            builder.GetSection("ReaderServiceBusConfig").Bind(_readerServiceBusConfig);
 
             return builder;
         }
@@ -55,7 +60,8 @@ namespace Writer
         {
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<IServiceBusClient, ServiceBusClient>()
-                .AddSingleton(_serviceBusConfig)
+                .AddSingleton(_writerServiceBusConfig)
+                .AddSingleton(_readerServiceBusConfig)
                 .BuildServiceProvider();
             return serviceProvider;
         }

@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "Models/1.0.0": {
+      "Models/1.0.1": {
         "runtime": {
           "Models.dll": {}
         }
@@ -14,7 +14,7 @@
     }
   },
   "libraries": {
-    "Models/1.0.0": {
+    "Models/1.0.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

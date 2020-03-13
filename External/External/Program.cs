@@ -38,7 +38,6 @@ namespace External
                 {
                     Author = author,
                     Operation = ReadOrWrite.Write,
-                    Receiver = Subscriptor.Writer
                 };
 
                 await serviceBusClient.SendMessageAsync(message);

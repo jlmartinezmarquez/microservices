@@ -1942,7 +1942,7 @@
           "lib/netstandard1.3/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "martinezmarquezjlmodelsmicroservices/1.0.0": {
+      "martinezmarquezjlmodelsmicroservices/1.0.1": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v3.1",
         "compile": {
@@ -6735,7 +6735,7 @@
         "system.xml.xmlserializer.nuspec"
       ]
     },
-    "martinezmarquezjlmodelsmicroservices/1.0.0": {
+    "martinezmarquezjlmodelsmicroservices/1.0.1": {
       "type": "project",
       "path": "../Models/Models.csproj",
       "msbuildProject": "../Models/Models.csproj"
@@ -6750,7 +6750,7 @@
       "Microsoft.Extensions.Configuration.FileExtensions >= 3.1.1",
       "Microsoft.Extensions.Configuration.Json >= 3.1.1",
       "Microsoft.Extensions.DependencyInjection >= 3.1.1",
-      "martinezmarquezjlmodelsmicroservices >= 1.0.0"
+      "martinezmarquezjlmodelsmicroservices >= 1.0.1"
     ]
   },
   "packageFolders": {
