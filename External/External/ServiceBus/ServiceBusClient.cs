@@ -10,7 +10,6 @@ namespace External.ServiceBus
 {
     public class ServiceBusClient : IServiceBusClient
     {
-        // TODO 2.- Writer microservice, implement subscribing to the topic and just picking the messages for it, following https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dotnet-how-to-use-topics-subscriptions
         // TODO 4.- Implement Saving data on the Write DB on the Writer microservice
         // TODO 5.- Implement Reading data on the Writer microservice when there is a message asking for it on the topic, and put a message in the topic for the Reader microservice
         // TODO 6.- As the rest of the steps for the other microservices are pretty much the same, put the Writer and External microservices in Docker containers
