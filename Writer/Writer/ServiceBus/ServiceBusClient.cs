@@ -1,23 +1,32 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.ServiceBus;
 using Writer.ConfigurationModels;
 using Models;
+using MongoDB.Driver;
+using Newtonsoft.Json;
 using Writer.Config;
 
 namespace Writer.ServiceBus
 {
     public class ServiceBusClient : IServiceBusClient
     {
-        private static ISubscriptionClient _subscriptionClient;
-        private readonly CosmosClient _cosmosClient;
+        private static ISubscriptionClient subscriptionClient;
+        private readonly WriterCosmosDbConfig writerCosmosDbConfig;
+        private readonly IMongoDatabase cosmosDatabase;
 
         public ServiceBusClient(ServiceBusConfig serviceBusConfig, WriterCosmosDbConfig writerCosmosDbConfig)
         {
-            _subscriptionClient = new SubscriptionClient(serviceBusConfig.ConnectionString, serviceBusConfig.TopicName, serviceBusConfig.SubscriptionName);
-            _cosmosClient = new CosmosClient(writerCosmosDbConfig.ConnectionString);
+            this.writerCosmosDbConfig = writerCosmosDbConfig;
+            subscriptionClient = new SubscriptionClient(serviceBusConfig.ConnectionString, serviceBusConfig.TopicName, serviceBusConfig.SubscriptionName);
+
+            var mongoClient = new MongoClient(writerCosmosDbConfig.ConnectionString);
+            cosmosDatabase = mongoClient.GetDatabase(writerCosmosDbConfig.DataBaseId);
         }
 
         public void RegisterOnMessageHandlerAndReceiveMessages()
@@ -28,20 +37,26 @@ namespace Writer.ServiceBus
                 AutoComplete = false
             };
 
-            _subscriptionClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
+            subscriptionClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
         }
 
-        static async Task ProcessMessagesAsync(Message message, CancellationToken token)
+        private async Task ProcessMessagesAsync(Message message, CancellationToken token)
         {
             if (IsThisMessageForMe(message)) 
             {
-                // TODO: Save it on Cosmos DB
-                
+                // Save it on Cosmos DB
+                var deserialisedMessage = JsonConvert.DeserializeObject<MessageModel>(message.ToString());
+
+                var authorsCollection = cosmosDatabase.GetCollection<ExternalApiAuthor>(writerCosmosDbConfig.AuthorsCollectionId);
+                var booksCollection = cosmosDatabase.GetCollection<ExternalApiBook>(writerCosmosDbConfig.BooksCollectionId);
+
+                await authorsCollection.InsertOneAsync(deserialisedMessage.Author, cancellationToken: token).ConfigureAwait(false);
+                await booksCollection.InsertManyAsync(deserialisedMessage.Books, cancellationToken: token).ConfigureAwait(false);
             }
             
             // Complete the message so that it is not received again.
             // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
-            await _subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
+            await subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
 
             // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
             // If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.
@@ -50,8 +65,7 @@ namespace Writer.ServiceBus
 
         private static bool IsThisMessageForMe(Message message)
         {
-            return message.UserProperties.ContainsKey(nameof(Subscriptor)) &&
-                          (int) message.UserProperties[nameof(Subscriptor)] == (int)Subscriptor.Writer;
+            return message.UserProperties.ContainsKey(nameof(Subscriptor)) && (int) message.UserProperties[nameof(Subscriptor)] == (int)Subscriptor.Writer;
         }
 
         static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)

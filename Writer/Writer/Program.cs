@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Writer.Config;
 using Writer.ConfigurationModels;
 using Writer.ServiceBus;
 
@@ -10,8 +10,9 @@ namespace Writer
 {
     class Program
     {
-        private static ServiceBusConfig _writerServiceBusConfig;
-        private static ServiceBusConfig _readerServiceBusConfig;
+        private static ServiceBusConfig writerServiceBusConfig;
+        private static ServiceBusConfig readerServiceBusConfig;
+        private static WriterCosmosDbConfig writerCosmosDbConfig;
 
         static void Main(string[] args)
         {
@@ -41,8 +42,9 @@ namespace Writer
 
         private static IConfigurationRoot SetConfiguration()
         {
-            _readerServiceBusConfig = new ServiceBusConfig();
-            _writerServiceBusConfig = new ServiceBusConfig();
+            readerServiceBusConfig = new ServiceBusConfig();
+            writerServiceBusConfig = new ServiceBusConfig();
+            writerCosmosDbConfig = new WriterCosmosDbConfig();
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -50,8 +52,9 @@ namespace Writer
                 .AddEnvironmentVariables()
                 .Build();
 
-            builder.GetSection("WriterServiceBusConfig").Bind(_writerServiceBusConfig);
-            builder.GetSection("ReaderServiceBusConfig").Bind(_readerServiceBusConfig);
+            builder.GetSection("WriterServiceBusConfig").Bind(writerServiceBusConfig);
+            builder.GetSection("ReaderServiceBusConfig").Bind(readerServiceBusConfig);
+            builder.GetSection("WriterCosmosDbConfig").Bind(writerCosmosDbConfig);
 
             return builder;
         }
@@ -60,8 +63,9 @@ namespace Writer
         {
             var serviceProvider = new ServiceCollection()
                 .AddSingleton<IServiceBusClient, ServiceBusClient>()
-                .AddSingleton(_writerServiceBusConfig)
-                .AddSingleton(_readerServiceBusConfig)
+                .AddSingleton(writerServiceBusConfig)
+                .AddSingleton(readerServiceBusConfig)
+                .AddSingleton(writerCosmosDbConfig)
                 .BuildServiceProvider();
             return serviceProvider;
         }

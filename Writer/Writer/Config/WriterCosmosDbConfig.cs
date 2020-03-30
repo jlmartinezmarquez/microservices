@@ -12,6 +12,8 @@
 
         public string DataBaseId { get; set; }
 
-        public string CollectionId { get; set; }
+        public string AuthorsCollectionId { get; set; }
+        
+        public string BooksCollectionId { get; set; }
     }
 }
