@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using External.ConfigurationModels;
 using Microsoft.Azure.ServiceBus;
 using Models;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace External.ServiceBus
 {
@@ -27,7 +28,7 @@ namespace External.ServiceBus
             try
             {
                 // Create a new message to send to the topic.
-                var messageBody = JsonConvert.SerializeObject(originalMessage);
+                var messageBody = JsonSerializer.Serialize(originalMessage);
                 var message = new Message(Encoding.UTF8.GetBytes(messageBody));
 
                 message.UserProperties.Add(nameof(Subscriptor), (int)Subscriptor.Writer);

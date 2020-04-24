@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Security.Authentication;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.ServiceBus;
 using Writer.ConfigurationModels;
 using Models;
 using MongoDB.Driver;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Writer.Config;
 
 namespace Writer.ServiceBus
@@ -42,20 +39,27 @@ namespace Writer.ServiceBus
 
         private async Task ProcessMessagesAsync(Message message, CancellationToken token)
         {
-            if (IsThisMessageForMe(message)) 
+            if (IsThisMessageForMe(message))
             {
-                // Save it on Cosmos DB
-                var deserialisedMessage = JsonConvert.DeserializeObject<MessageModel>(message.ToString());
+                try
+                {
+                    var deserialisedMessage = JsonSerializer.Deserialize<MessageModel>(Encoding.UTF8.GetString(message.Body));
 
-                var authorsCollection = cosmosDatabase.GetCollection<ExternalApiAuthor>(writerCosmosDbConfig.AuthorsCollectionId);
-                var booksCollection = cosmosDatabase.GetCollection<ExternalApiBook>(writerCosmosDbConfig.BooksCollectionId);
+                    var authorsCollection = cosmosDatabase.GetCollection<ExternalApiAuthor>(writerCosmosDbConfig.AuthorsCollectionId);
+                    var booksCollection = cosmosDatabase.GetCollection<ExternalApiBook>(writerCosmosDbConfig.BooksCollectionId);
 
-                await authorsCollection.InsertOneAsync(deserialisedMessage.Author, cancellationToken: token).ConfigureAwait(false);
-                await booksCollection.InsertManyAsync(deserialisedMessage.Books, cancellationToken: token).ConfigureAwait(false);
+                    // Save it on Cosmos DB
+                    await authorsCollection.InsertOneAsync(deserialisedMessage.Author, cancellationToken: token).ConfigureAwait(false);
+                    await booksCollection.InsertManyAsync(deserialisedMessage.Books, cancellationToken: token).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
-            
-            // Complete the message so that it is not received again.
-            // This can be done only if the subscriptionClient is created in ReceiveMode.PeekLock mode (which is the default).
+
+            //TODO: Not sure whether we need to complete the msg if it wasn't for this subscriptor ....
             await subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
 
             // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
